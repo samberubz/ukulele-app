@@ -14,7 +14,7 @@ from PIL import Image
 # ─────────────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="Ukulele Songbook",
+    page_title="Ukulele App",
     page_icon="🎵",
     layout="wide",
 )
@@ -348,7 +348,7 @@ def render_song_tab(slug: str, title: str):
 
     # RIGHT: tab file
     with col_tab:
-        st.markdown("**Picking / chords**")
+        st.markdown("**Picking / Chords**")
         tab_file = find_tab_file(folder)
 
         if tab_file is None:
@@ -415,7 +415,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-tab_labels = ["🎼 Chords"] + [title for _, title in SONGS]
+tab_labels = ["Chords"] + [title for _, title in SONGS]
 tabs = st.tabs(tab_labels)
 
 with tabs[0]:
