@@ -251,7 +251,7 @@ def lyrics_to_html(text: str) -> str:
             line = line.strip()
             if line.startswith("[") and line.endswith("]"):
                 rendered.append(
-                    f'<div style="font-weight:600;color:#5c4ab5;margin-top:14px;'
+                    f'<div style="font-weight:600;color:#a59ce8;margin-top:14px;'
                     f'margin-bottom:4px;font-size:0.95em">{line}</div>'
                 )
             else:
@@ -263,7 +263,7 @@ def lyrics_to_html(text: str) -> str:
         html_blocks.append("".join(rendered))
 
     return ('<div style="font-family:-apple-system,system-ui,sans-serif;'
-            'font-size:0.95em;color:#222">' + "".join(html_blocks) + '</div>')
+            'font-size:0.95em;color:#d0d0d0">' + "".join(html_blocks) + '</div>')
 
 
 # ─────────────────────────────────────────────────────────────────────
