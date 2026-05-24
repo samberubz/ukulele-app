@@ -1,4 +1,4 @@
-"""Ukulele Songbook — a personal Streamlit app.
+"""Ukulele
 
 Layout:
 - Tab 1: Ukulele chord reference (common chords with diagrams)
@@ -298,7 +298,7 @@ def render_pdf_page(pdf_path_str: str, page_num: int, scale: float = 2.0) -> Ima
 # ─────────────────────────────────────────────────────────────────────
 
 def render_chords_tab():
-    st.markdown("### 🎵 Ukulele chord reference")
+    st.markdown("### Ukulele chord reference")
     st.caption("Standard tuning: **G – C – E – A** (high G). Open circles = open string, filled dots = fingered fret.")
 
     for root in CHORD_ROOTS:
@@ -410,8 +410,8 @@ def render_song_tab(slug: str, title: str):
 # ─────────────────────────────────────────────────────────────────────
 
 st.markdown(
-    "<h1 style='margin-bottom:0'>🎵 Ukulele Songbook</h1>"
-    "<p style='color:#777;margin-top:4px'>Personal practice app</p>",
+    "<h1 style='margin-bottom:0'>Ukulele</h1>"
+    "<p style='color:#777;margin-top:4px'>Personal App</p>",
     unsafe_allow_html=True,
 )
 
