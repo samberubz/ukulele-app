@@ -224,7 +224,7 @@ def chord_svg(name: str, frets: list, width: int = 110, height: int = 145) -> st
         else:
             rel_fret = fret - start_fret
             y = grid_top + (rel_fret - 0.5) * fret_gap
-            parts.append(f'<circle cx="{x}" cy="{y}" r="6" fill="#222"/>')
+            parts.append(f'<circle cx="{x}" cy="{y}" r="6" fill="#d0d0d0"/>')
 
     parts.append('</svg>')
     return "".join(parts)
