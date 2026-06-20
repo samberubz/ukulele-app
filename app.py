@@ -331,25 +331,87 @@ def render_chords_tab():
 
 VIEWER_HEIGHT = 720
 
+# Zoom settings for the tab viewer
+ZOOM_MIN = 0.5
+ZOOM_MAX = 3.0
+ZOOM_STEP = 0.25
+ZOOM_DEFAULT = 1.0
+
+# Baseline display widths (px) at zoom = 1.0
+TAB_BASE_WIDTH_SPLIT = 650   # when lyrics are shown side-by-side
+TAB_BASE_WIDTH_FULL = 1150   # when lyrics are hidden and tab takes full width
+
+# Render PDFs at a fixed high resolution so zooming in stays crisp
+PDF_RENDER_SCALE = 3.0
+
+
 def render_song_tab(slug: str, title: str):
     folder = SONGS_DIR / slug
 
+    hide_key = f"hide_lyrics_{slug}"
+    zoom_key = f"zoom_{slug}"
+
+    if hide_key not in st.session_state:
+        st.session_state[hide_key] = False
+    if zoom_key not in st.session_state:
+        st.session_state[zoom_key] = ZOOM_DEFAULT
+
+    hide_lyrics = st.session_state[hide_key]
+    zoom = st.session_state[zoom_key]
+
     st.markdown(f"### {title}")
 
-    col_lyrics, col_tab = st.columns([1, 1], gap="large")
+    # ── Controls row: hide/show lyrics + zoom controls ──
+    ctrl_cols = st.columns([2, 1, 1, 1, 1, 4])
+    with ctrl_cols[0]:
+        toggle_label = "Show lyrics" if hide_lyrics else "Hide lyrics"
+        if st.button(toggle_label, key=f"toggle_lyrics_{slug}", use_container_width=True):
+            st.session_state[hide_key] = not hide_lyrics
+            st.rerun()
+    with ctrl_cols[1]:
+        if st.button("➖", key=f"zoom_out_{slug}", use_container_width=True,
+                      disabled=(zoom <= ZOOM_MIN)):
+            st.session_state[zoom_key] = round(max(ZOOM_MIN, zoom - ZOOM_STEP), 2)
+            st.rerun()
+    with ctrl_cols[2]:
+        st.markdown(
+            f"<div style='text-align:center;padding-top:6px;color:#888;font-size:0.9em'>"
+            f"{int(zoom * 100)}%</div>",
+            unsafe_allow_html=True
+        )
+    with ctrl_cols[3]:
+        if st.button("➕", key=f"zoom_in_{slug}", use_container_width=True,
+                      disabled=(zoom >= ZOOM_MAX)):
+            st.session_state[zoom_key] = round(min(ZOOM_MAX, zoom + ZOOM_STEP), 2)
+            st.rerun()
+    with ctrl_cols[4]:
+        if st.button("Reset", key=f"zoom_reset_{slug}", use_container_width=True,
+                      disabled=(zoom == ZOOM_DEFAULT)):
+            st.session_state[zoom_key] = ZOOM_DEFAULT
+            st.rerun()
 
-    # LEFT: lyrics
-    with col_lyrics:
-        st.markdown("**Lyrics**")
-        lyrics_path = folder / "lyrics.txt"
-        lyrics_text = lyrics_path.read_text(encoding="utf-8") if lyrics_path.exists() else ""
-        with st.container(height=VIEWER_HEIGHT, border=True):
-            st.markdown(lyrics_to_html(lyrics_text), unsafe_allow_html=True)
+    if hide_lyrics:
+        col_lyrics = None
+        col_tab = st.container()
+    else:
+        col_lyrics, col_tab = st.columns([1, 1], gap="large")
 
-    # RIGHT: tab file
+    # LEFT: lyrics (only when not hidden)
+    if col_lyrics is not None:
+        with col_lyrics:
+            st.markdown("**Lyrics**")
+            lyrics_path = folder / "lyrics.txt"
+            lyrics_text = lyrics_path.read_text(encoding="utf-8") if lyrics_path.exists() else ""
+            with st.container(height=VIEWER_HEIGHT, border=True):
+                st.markdown(lyrics_to_html(lyrics_text), unsafe_allow_html=True)
+
+    # RIGHT (or full width): tab file
     with col_tab:
         st.markdown("**Picking / Chords**")
         tab_file = find_tab_file(folder)
+
+        base_width = TAB_BASE_WIDTH_FULL if hide_lyrics else TAB_BASE_WIDTH_SPLIT
+        display_width = int(base_width * zoom)
 
         if tab_file is None:
             with st.container(height=VIEWER_HEIGHT, border=True):
@@ -374,8 +436,8 @@ def render_song_tab(slug: str, title: str):
             current = st.session_state[page_key]
 
             with st.container(height=VIEWER_HEIGHT, border=True):
-                image = render_pdf_page(str(tab_file), current)
-                st.image(image, use_container_width=True)
+                image = render_pdf_page(str(tab_file), current, scale=PDF_RENDER_SCALE)
+                st.image(image, width=display_width)
 
             # Bottom navigation — only if more than one page
             if num_pages > 1:
@@ -402,7 +464,8 @@ def render_song_tab(slug: str, title: str):
 
         else:  # jpg / jpeg / png
             with st.container(height=VIEWER_HEIGHT, border=True):
-                st.image(str(tab_file), use_container_width=True)
+                image = Image.open(tab_file)
+                st.image(image, width=display_width)
 
 
 # ─────────────────────────────────────────────────────────────────────
